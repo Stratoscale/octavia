@@ -21,6 +21,7 @@ import multiprocessing as multiproc
 import os
 import ssl
 import sys
+import socket
 
 from oslo_config import cfg
 from oslo_reports import guru_meditation_report as gmr
@@ -53,7 +54,10 @@ class OctaviaSSLContext(serving._SSLContext):
 
     def wrap_socket(self, sock, **kwargs):
         return super(OctaviaSSLContext, self).wrap_socket(
-            sock,
+            # Known bug in Python 2.7 - http://bugs.python.org/issue13942
+            # http://stackoverflow.com/questions/16739293/
+            # python-cannot-rebuild-ssl-socket-after-putting-in-multiprocessing-queue
+            socket.socket(_sock=sock),
             # Comment out for debugging if you want to connect without
             # a client cert
             cert_reqs=ssl.CERT_REQUIRED,
